@@ -31,13 +31,16 @@ struct node peek(struct QNode** head)
  
 // Removes the element with the
 // highest priority form the list
-void DeQueue(struct QNode** head, struct node *Dequeued)
+node* DeQueue(struct QNode** head)
 {
+    node *Dequeued; 
     struct QNode* temp = *head;
 	Dequeued = &((*head)->process);
+    //printf("yarab %d \n",Dequeued->priority);
     (*head) = (*head)->next;
 
     free(temp);
+    return Dequeued;
 }
  
 // Function to push according to priority
@@ -50,7 +53,7 @@ void EnQueue(struct QNode** head,struct node input)
     // priority than new node. So insert new
     // node before head node and change head node.
 	int p = input.priority;
-    if ((*head)->process.priority < p) {
+    if ((*head)->process.priority > p) {
         // Insert New Node before head
         temp->next = *head;
         (*head) = temp;
