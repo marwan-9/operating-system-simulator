@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     else if ( atoi( argv[1] ) == 2 ) // HPF
     {
         //loop and receive new processes
+        //receive, fork a process and enqueue
+
         // struct msgbuff message;
         // int rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, !IPC_NOWAIT);
 
@@ -25,6 +27,11 @@ int main(int argc, char *argv[])
         // if (rec_value == -1){
         //     perror("Error in receive\n");
         // }
+
+        //peek and dequeue if time or if priority > priority running
+        //in which case enqueue the running
+        //if a process is done remove the node but dont delete the process
+
 
     }
     else if ( atoi( argv[1] ) == 3 ) // RR
