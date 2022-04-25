@@ -58,17 +58,18 @@ process->arrival_time=processes[i].arrival_time;
     latch[process->priority]=process;
  }
 }
-while (!isEmpty(&Q0)){
-node* trail = DeQueue(&Q0);
-printList(trail);
-}
+   PrintQueue(&Q0);
+
+//======================================PRINT QUEUE CODE ENDED===================================//
 
 
-char a;
-  scanf("%c", &a);
-  while (a==10){
-
-     printf("MARWAN");
+char clk;
+int aux=0;
+scanf(" %c", &clk);
+  while (clk=='c' && !isEmpty(&Q0)){
+   scanf(" %c", &clk);
   }
 
-}
+
+
+ }

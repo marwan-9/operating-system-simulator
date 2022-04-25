@@ -37,7 +37,7 @@ node* DeQueue(struct QNode** head)
     node *Dequeued; 
     struct QNode* temp = *head;
 	Dequeued = ((*head)->process);
-    //printf("INSIDE DEQ %d \n",(*head)->process->key);
+     //printf("here?"); fflush(stdout);
     (*head) = (*head)->Qnext;
     
     free(temp);
@@ -84,4 +84,31 @@ void EnQueue(struct QNode** head,struct node* input)
 int isEmpty(struct QNode** head)
 {
     return (*head) == NULL;
+}
+
+
+void PrintQueue(struct QNode** Q0){
+
+struct QNode* Q1;
+int aux=0;
+while (!isEmpty(Q0)){
+   node* temp = DeQueue(Q0);
+   printList(temp);
+   if (aux==0)
+   Q1 = newNode(temp);
+   else{
+   EnQueue(&Q1,temp);
+   aux++;
+   }
+}
+   aux=0;
+   while (!isEmpty(&Q1)){
+      node* temp = DeQueue(&Q1);
+      if (aux==0)
+      *Q0 = newNode(temp);
+      else {
+      EnQueue(Q0,temp);
+      aux++;
+      }
+   }
 }
