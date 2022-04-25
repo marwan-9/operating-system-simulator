@@ -66,6 +66,9 @@ printList(trail);
 
 char a;
   scanf("%c", &a);
+  while (a==10){
 
-    printf("You entered %d",a); 
+     printf("MARWAN");
+  }
+
 }
