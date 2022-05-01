@@ -18,7 +18,7 @@ void printList(node *input) {
 	
    //start from the beginning
    while (ptr!=NULL){
-     printf("(#%d,P%d,T%d) -->",ptr->key,ptr->priority,ptr->runtime);
+     printf("(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->runtime,ptr->Live_Priority);
       ptr = ptr->next;
 
      
@@ -67,7 +67,43 @@ void insertAfter(struct node* prev_node, struct node* new_data)
 
 }
 
+void cleanChain(node* Chain_Head){
+        printf("GAYLY %d",Chain_Head->priority); fflush(stdout);
+   int p_ref;
 
+   if (Chain_Head!=NULL)
+   p_ref = Chain_Head->priority;
+
+   node* temp = Chain_Head;
+         
+   while (temp!=NULL && temp->next!=NULL){
+          
+      if (temp->next->priority!=p_ref){
+          
+         temp->next=NULL;
+
+           // printf("NEWWWWWWW %d %d",temp->key, temp->next->key); fflush(stdout);
+      }
+      
+      if (temp->next!=NULL && temp->next->runtime==0){
+             
+         temp->next=temp->next->next;
+      }
+
+      if (temp!=NULL){
+      temp=temp->next;
+      }
+
+   }
+
+}
+node* LastNodeInChain(node* temp){
+
+   while (temp !=NULL && temp->next !=NULL){
+      temp=temp->next;
+   }
+   return temp;
+}
 //delete first item
 struct node* deleteFirst() {
 

@@ -15,6 +15,7 @@ int isEmpty(struct QNode** head);
 // Function to Create A New Node
 struct QNode* newNode(struct node* input)
 {
+    
     struct QNode* temp = (struct QNode*)malloc(sizeof(struct QNode));
     temp->process = input;
     //temp->process->priority = input->priority;
@@ -56,8 +57,8 @@ void EnQueue(struct QNode** head,struct node* input)
     // Special Case: The head of list has lesser
     // priority than new node. So insert new
     // node before head node and change head node.
-	int p = input->priority;
-    if ((*head)->process->priority > p) {
+	int p = input->Live_Priority;
+    if ((*head)->process->Live_Priority > p) {
         // Insert New Node before head
         temp->Qnext = *head;
         (*head) = temp;
@@ -67,7 +68,7 @@ void EnQueue(struct QNode** head,struct node* input)
         // Traverse the list and find a
         // position to insert new node
         if (start !=NULL){
-        while (start->Qnext!=NULL && (start->Qnext)->process->priority < p) {
+        while (start->Qnext!=NULL && (start->Qnext)->process->Live_Priority < p) {
             start = start->Qnext;
         }
     }
@@ -93,9 +94,13 @@ struct QNode* Q1;
 int aux=0;
 while (!isEmpty(Q0)){
    node* temp = DeQueue(Q0);
+   //printf("I will print this %d" ,temp->key);
    printList(temp);
-   if (aux==0)
+   if (aux==0){
+
    Q1 = newNode(temp);
+   aux++;
+   }
    else{
    EnQueue(&Q1,temp);
    aux++;
@@ -104,8 +109,11 @@ while (!isEmpty(Q0)){
    aux=0;
    while (!isEmpty(&Q1)){
       node* temp = DeQueue(&Q1);
-      if (aux==0)
+     
+      if (aux==0){
       *Q0 = newNode(temp);
+      aux++;
+      }
       else {
       EnQueue(Q0,temp);
       aux++;

@@ -10,6 +10,7 @@ typedef struct node {
    int priority;
    int runtime;
    int data;
+   int Live_Priority;
    struct node *next;
 } node;
 #endif
