@@ -95,7 +95,6 @@ scanf(" %c", &clk); //Fake clock (TO BE DELETED)
 
    //Enqueue-ing the following process in the chain into the queue.
    if (temp->next!=NULL){  
-   printf("temp next %d \n", temp->next->key);
        if (isEmpty(&Q0)){
          Q0=newNode(temp->next);
        }
@@ -107,7 +106,6 @@ scanf(" %c", &clk); //Fake clock (TO BE DELETED)
   //Now we have two main cases, whether the process has already finished or still has remaining runtime.
   //Case1: Process has already finished
   if (temp->runtime==0){
-     printf("KHASLAT \n");
    }
 
   //Case2: Process still has remaining runtime.
@@ -122,7 +120,6 @@ scanf(" %c", &clk); //Fake clock (TO BE DELETED)
          if (temp->Live_Priority==5){
             Degrader=0;
          }
-         printf("Marwan %d \n",Degrader);fflush(stdout);
          //Handling: Conrner Case of degrading more than one level. 
          while(latch[temp->Live_Priority+Degrader]==NULL){
             Degrader++;
@@ -138,7 +135,6 @@ scanf(" %c", &clk); //Fake clock (TO BE DELETED)
          if (temp->Live_Priority==5 && temp->priority==5 && stop==0){
             hold_key=temp->key;
             stop++;
-            printf("I HAVE STORED HOLD KEY %d \n",hold_key);
          }
      
      }
@@ -163,18 +159,15 @@ scanf(" %c", &clk); //Fake clock (TO BE DELETED)
             flags[temp->Live_Priority]=temp->priority;
             counter++;
             current = Live_latch[temp->Live_Priority];
-            printf("HNNAAA");
         }
 
         else { //It is NOT the first process in particular priority
             if(current->priority==temp->priority){ 
-               printf("TEMP PRIORTY %d \n",temp->priority);
                current->next=temp;
                current=current->next;
             }
 
             else {
-               printf("NULLETO");
                current->next=NULL;
             }
         }
@@ -213,7 +206,6 @@ scanf(" %c", &clk); //Fake clock (TO BE DELETED)
    }
    
  //============================================End Re-Snaping===============================================// 
-  printf("YARABB %d \n",temp->priority);fflush(stdout);
   if (!isEmpty(&Q0)){
   PrintQueue(&Q0);
   }

@@ -94,7 +94,6 @@ struct QNode* Q1;
 int aux=0;
 while (!isEmpty(Q0)){
    node* temp = DeQueue(Q0);
-   //printf("I will print this %d" ,temp->key);
    printList(temp);
    if (aux==0){
 
@@ -119,4 +118,5 @@ while (!isEmpty(Q0)){
       aux++;
       }
    }
+   printf("\n");
 }

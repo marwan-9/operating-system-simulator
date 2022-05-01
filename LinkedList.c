@@ -68,7 +68,6 @@ void insertAfter(struct node* prev_node, struct node* new_data)
 }
 
 void cleanChain(node* Chain_Head){
-        printf("GAYLY %d",Chain_Head->priority); fflush(stdout);
    int p_ref;
 
    if (Chain_Head!=NULL)
