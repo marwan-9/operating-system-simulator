@@ -18,6 +18,13 @@ typedef short bool;
 #define SHKEY 300
 
 
+enum status {
+    started,
+    resumed,
+    stopped,
+    finished,
+    arrived
+};
 
 struct process
 {
