@@ -1,4 +1,5 @@
 #include "headers.h"
+#include "time.h"
 
 void handler(int signum);
 
@@ -12,83 +13,75 @@ int main(int argc, char *argv[])
     // opening the file
     FILE *fp = fopen(filename, "r");
     int filechar = 0;
-    int flag = fscanf(fp, "%d", &filechar);
+
+    // getting the number of processes in the file
+    int size = 0;
+    printf("%d\n", size);
+
+    // skipping comment line
+    fscanf(fp, "%*[^\n]\n");
+
+    while (fscanf(fp, "%d", &filechar) != EOF)
+    {
+        size++;
+    }
+    size /= 4;
 
     // creating the array which will hold the processes
-    // to avoid having to put a limit we can just use a queue instead of an array ?????
-    struct process ProcessArray[300];
+    struct process *ProcessArray = (struct process *)malloc(size * sizeof(struct process));
+
+    // resetting file pointer
+    fseek(fp, 0, SEEK_SET);
+
     int index = 0;
+    // skipping comment line
+    fscanf(fp, "%*[^\n]\n");
 
-    while (flag != EOF)
+    while (fscanf(fp, "%d", &filechar) != EOF)
     {
-        // skipping the comment line(s)
-        if (flag == 0) // 0 indicates unsuccessful conversion which means that the filechar couldnt read an integer, so the line is a comment.
-            fscanf(fp, "%*[^\n]\n");
-        else
-        {
-            ProcessArray[index].id = filechar;
-            fscanf(fp, "%d", &filechar);
-            ProcessArray[index].arrvialtime = filechar;
-            fscanf(fp, "%d", &filechar);
-            ProcessArray[index].runtime = filechar;
-            fscanf(fp, "%d", &filechar);
-            ProcessArray[index].priority = filechar;
+        ProcessArray[index].id = filechar;
+        fscanf(fp, "%d", &filechar);
+        ProcessArray[index].arrvialtime = filechar;
+        fscanf(fp, "%d", &filechar);
+        ProcessArray[index].runtime = filechar;
+        fscanf(fp, "%d", &filechar);
+        ProcessArray[index].priority = filechar;
 
-            index++;
-        }
-
-        flag = fscanf(fp, "%d", &filechar);
+        index++;
     }
 
-    //closing the file
+    // closing the file
     fclose(fp);
 
     // getting the chosen scheduling algorithm & parameters from the user
     printf("Please choose the scheduling algorithm you want to run:\nEnter 1 for SJF\nEnter 2 for HPF\nEnter 3 for RR\nEnter 4 for Multilevel feedback loop\n");
     scanf("%s", argv[1]);
     // in case of RR get the quantum
-    argv[2]="0";
+    argv[2] = "0";
     if (atoi(argv[1]) == 3)
     {
         printf("Please enter the quantum: ");
         scanf("%s", argv[2]);
     }
 
-    sprintf(argv[3],"%d",index); // sending number of processes as the third argument
-
-    //fork & execute clock
-    int clk = fork();
-    if (clk == 0)
-    {
-        char *arg [] = {NULL};
-        int execute = execv("./clk.out", arg);
-        // error handling
-        if (execute == -1)
-            printf("failed to execute clk\n");
-        perror("The error is: \n");
-        exit(-1);
-    }
-    //system("./clk.out &");
-
-    // establishing communication with the clock module
-    initClk();
+    sprintf(argv[3], "%d", index); // sending number of processes as the third argument
 
     // fork & execute scheduler
-    int scheduler = fork();
-    if (scheduler == 0)
-    {
-        int execute = execv("./scheduler.out", argv);
-        // error handling
-        if (execute == -1)
-            printf("failed to execute scheduler\n");
-        perror("The error is: \n");
-        exit(-1);
-    }
+    // int scheduler = fork();
+    // if (scheduler == 0)
+    // {
+    //     int execute = execv("./scheduler.out", argv);
+    //     // error handling
+    //     if (execute == -1)
+    //         printf("failed to execute scheduler\n");
+    //     perror("The error is: \n");
+    //     exit(-1);
+    // }
 
-    // char string[100];
-    // snprintf(string,sizeof(string),"./scheduler.out %s %s %s &",argv[1],argv[2],argv[3]);
-    // printf("%s\n",string);
-    // system(string);
+    // NO FORKING
+    char string[100];
+    snprintf(string, sizeof(string), "./scheduler.out %s %s %s &", argv[1], argv[2], argv[3]);
+    system(string);
 
     // creating a message queue
     int keyid = ftok(".", 65);
@@ -98,6 +91,25 @@ int main(int argc, char *argv[])
     message.mtype = 1; // any arbitary number to send and receive on
     int i = 0;
 
+    // fork & execute clock
+    //  int clk = fork();
+    //  if (clk == 0)
+    //  {
+    //      char *arg [] = {NULL};
+    //      int execute = execv("./clk.out", arg);
+    //      // error handling
+    //      if (execute == -1)
+    //          printf("failed to execute clk\n");
+    //      perror("The error is: \n");
+    //      exit(-1);
+    //  }
+
+    // NO FORKING
+    system("./clk.out &");
+
+    // establishing communication with the clock module
+    initClk();
+
     // loop and send the arrived processes to the scheduler using message queue
     while (i < index)
     {
@@ -106,7 +118,7 @@ int main(int argc, char *argv[])
         while (getClk() < message.process.arrvialtime)
         {
             sleep(message.process.arrvialtime - getClk());
-           // sleep(1);
+            // sleep(1);
         }
 
         int send_val = msgsnd(msqid, &message, sizeof(message.process), !IPC_NOWAIT);
@@ -115,20 +127,28 @@ int main(int argc, char *argv[])
         {
             perror("Failed to send. The error is ");
         }
-        //printf("sent: %d at time %d\n",message.process.id,getClk());
+        printf("sent: %d at time %d\n", message.process.id, getClk());
 
         i++;
     }
 
-    // waiting for scheduler to end (end of simulation)
-    int status;
-    waitpid(scheduler, &status, 0);
+    // FORKING
+    //  waiting for scheduler to end (end of simulation)
+    //  int status;
+    //  waitpid(scheduler, &status, 0);
 
-    if (WEXITSTATUS(status) == -1)
-        printf("Error in Scheduler\n");
+    // if (WEXITSTATUS(status) == -1)
+    //     printf("Error in Scheduler\n");
 
     // releasing communication with the clock module
-    destroyClk(1);
+    destroyClk(0);
+
+    //freeing the dynamically allocated array
+    free(ProcessArray);
+
+    // NO FORKING
+    // process generator waiting till the exit signal at clock destruction (end of scheduler)
+    pause();
 
     return 0;
 }
@@ -136,7 +156,6 @@ int main(int argc, char *argv[])
 // Freeing the ipc resources at termination
 void handler(int signum)
 {
-    printf("im here\n");
     // getting the queue ID
     int keyid = ftok(".", 65);
     int msqid = msgget(keyid, 0666 | IPC_CREAT);

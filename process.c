@@ -4,7 +4,9 @@
 int remainingtime;
 
 void cont(int signum);
+void stop(int signum);
 int prevclk;
+int conttime=0;
 
 int main(int argc, char *argv[])
 {
@@ -16,13 +18,15 @@ int main(int argc, char *argv[])
 
    // printf("time at beginning for process %d: %d with runtime %d\n",getpid(),getClk(),atoi(argv[0]));
 
-
-    for (remainingtime;remainingtime>0;remainingtime--){
+    while (remainingtime>0){
         prevclk=getClk();
+      // printf("prev clk %d\n",prevclk);
         while (prevclk==getClk()) {}
-       // printf("clk changed at time %d\n",getClk());
+        //printf("prevclk=%d getclk %d\n",prevclk,getClk());
+        if (conttime != getClk())
+            remainingtime--;
+        //printf("clk changed at time %d rem time %d\n",getClk(),remainingtime);
     }
-
 
   // printf("time at ending for process %d : %d\n",getpid(),getClk());
 
@@ -36,6 +40,7 @@ int main(int argc, char *argv[])
 void cont(int signum)
 {
     //printf("sigcont for process %d at %d remaining time %d\n",getpid(),getClk(),remainingtime);
-    prevclk=getClk();
+    conttime=getClk();
+    //prevclk=getClk();
     signal(SIGCONT,cont);
 }
