@@ -16,7 +16,6 @@ int main(int argc, char *argv[])
 
     // getting the number of processes in the file
     int size = 0;
-    printf("%d\n", size);
 
     // skipping comment line
     fscanf(fp, "%*[^\n]\n");
@@ -56,12 +55,14 @@ int main(int argc, char *argv[])
     // getting the chosen scheduling algorithm & parameters from the user
     printf("Please choose the scheduling algorithm you want to run:\nEnter 1 for SJF\nEnter 2 for HPF\nEnter 3 for RR\nEnter 4 for Multilevel feedback loop\n");
     scanf("%s", argv[1]);
+
     // in case of RR get the quantum
-    argv[2] = "0";
+    //argv[2] = "0";
+    char quantum[10]="0";
     if (atoi(argv[1]) == 3)
     {
-        printf("Please enter the quantum: ");
-        scanf("%s", argv[2]);
+        printf("Please enter the quantum: \n");
+        scanf("%s", quantum);
     }
 
     sprintf(argv[3], "%d", index); // sending number of processes as the third argument
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
     // int scheduler = fork();
     // if (scheduler == 0)
     // {
+    //     argv[2]=quantum;
     //     int execute = execv("./scheduler.out", argv);
     //     // error handling
     //     if (execute == -1)
@@ -80,7 +82,7 @@ int main(int argc, char *argv[])
 
     // NO FORKING
     char string[100];
-    snprintf(string, sizeof(string), "./scheduler.out %s %s %s &", argv[1], argv[2], argv[3]);
+    snprintf(string, sizeof(string), "./scheduler.out %s %s %s &", argv[1],quantum, argv[3]);
     system(string);
 
     // creating a message queue
