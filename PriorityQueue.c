@@ -55,6 +55,10 @@ void PQEnQueue(struct PQNode** head,struct PQNode* newnode)
     struct PQNode* start = (*head);
     // Create new Node
     //struct PQNode* temp = newNode(input,Qpriority,Pid,remainingtime,waitingtime,status);
+    if(*head==NULL){
+        *head=newnode;
+        return;
+    }
     // Special Case: The head of list has lesser
     // priority than new node. So insert new
     // node before head node and change head node.
