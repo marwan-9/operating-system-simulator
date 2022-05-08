@@ -33,6 +33,74 @@ int main(int argc, char *argv[])
     ///////////////////////////////// SJF
     if (atoi(argv[1]) == 1)
     {
+        signal(SIGUSR1, ProcessTerminated);
+        process_count = atoi(argv[3]); // number of processes
+        //process_count = 3;
+        //struct proc ReadyQ[20] = {0};
+        struct PQNode *ReadyQ = NULL;
+        Running = NULL;
+        int last_runclk;
+
+        while(process_count > 0)
+        {
+            
+            struct msgbuff message;
+            int rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
+            while (rec_value != -1)
+            {
+                //printf("received: %d at time %d \n", message.process.id, getClk());
+               
+                utilization+=message.process.runtime;
+                
+                struct PQNode * newnode = PQnewNode(&message.process, message.process.priority, -1,message.process.runtime,0,arrived);
+
+                if (PQisEmpty(&ReadyQ))
+                {
+                    ReadyQ = newnode;
+                }
+                else
+                {
+                    Enqueue_RT(&ReadyQ, newnode);
+                }
+                
+                rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
+            }
+            int flag=0;
+            if (PQisEmpty(&Running) && !PQisEmpty(&ReadyQ))
+            {
+                Running = PQDeQueue(&ReadyQ);
+               flag=1;
+            }
+            if (flag==1 && !PQisEmpty(&Running))
+            {
+                if (Running->processPID == -1)
+                {
+                    // fork and take id of process
+                    int pid = fork();
+                    if (pid == 0)
+                    {
+                        char* runtime_char = malloc(sizeof(char));
+                        sprintf(runtime_char, "%d", Running->process.runtime);
+                        char *arg[] = {runtime_char, NULL};
+                        int execute = execv("./process.out", arg);
+                        if (execute == -1)
+                            printf("failed to execute process\n");
+                        perror("The error is: \n");
+                        exit(-1);
+                    }
+                    Running->processPID = pid;
+                    Running->status=started;
+                    Running->WaitingTime=(getClk()-Running->process.arrvialtime)-(Running->process.runtime-Running->ReaminingTime);
+                    fprintf(logfile,"At time %d process %d started arr %d total %d remain %d wait %d\n",getClk(),Running->process.id,Running->process.arrvialtime,Running->process.runtime,Running->ReaminingTime,Running->WaitingTime);
+                }
+                
+            }
+
+        }
+        wta/=atoi(argv[3]);
+        avg_wait/=atoi(argv[3]);
+        utilization/=getClk();
+        utilization*=100;
     }
     ///////////////////////////////// HPF
     else if (atoi(argv[1]) == 2)
