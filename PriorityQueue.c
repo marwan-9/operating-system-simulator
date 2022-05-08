@@ -84,7 +84,42 @@ void PQEnQueue(struct PQNode** head,struct PQNode* newnode)
 
     }
 }
- 
+ //Added//////////////////
+//Insert ascendingly according to the shorter runtime or burst
+void Enqueue_RT(struct PQNode** head,struct PQNode* newnode)
+{
+    struct PQNode* start = (*head);
+    
+    if(*head==NULL){
+        *head=newnode;
+        return;
+    }
+    // Special Case: The head of list has lesser
+    // runtime than new node. So insert new
+    // node before head node and change head node.
+	int p = newnode->ReaminingTime;
+    if ((*head)->ReaminingTime > p) {
+        // Insert New Node before head
+        newnode->next = *head;
+        (*head) = newnode;
+    }   
+
+    else {
+        // Traverse the list and find a
+        // position to insert new node
+        if (start !=NULL){
+        while (start->next!=NULL && (start->next)->ReaminingTime < p) {
+            start = start->next;
+        }
+    }
+        // Either at the ends of the list
+        // or at required position
+        newnode->next = start->next;
+        start->next = newnode;
+
+    }
+    
+}
 // Function to check is list is empty
 int PQisEmpty(struct PQNode** head)
 {
