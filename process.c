@@ -12,28 +12,31 @@ int main(int argc, char *argv[])
 {
     initClk();
     signal(SIGCONT,cont);
+    kill(getppid(),SIGCONT);
 
     //TODO The process needs to get the remaining time from somewhere
     remainingtime = atoi(argv[0]);
 
-   // printf("time at beginning for process %d: %d with runtime %d\n",getpid(),getClk(),atoi(argv[0]));
+   printf("time at beginning for process %d: %d with runtime %d\n",getpid(),getClk(),atoi(argv[0]));
 
     while (remainingtime>0){
         prevclk=getClk();
-      // printf("prev clk %d\n",prevclk);
+      //printf("prev clk %d\n",prevclk);
         while (prevclk==getClk()) {}
         //printf("prevclk=%d getclk %d\n",prevclk,getClk());
         if (conttime != getClk())
-            remainingtime--;
-        //printf("clk changed at time %d rem time %d\n",getClk(),remainingtime);
+            {
+              remainingtime--;
+              kill(getppid(),SIGUSR2);
+              printf("clk changed at time %d rem time %d\n",getClk(),remainingtime);
+            }
     }
 
-  // printf("time at ending for process %d : %d\n",getpid(),getClk());
+  printf("time at ending for process %d : %d\n",getpid(),getClk());
 
     kill(getppid(),SIGUSR1);
 
     destroyClk(0);
-
     return 0;
 }
 
