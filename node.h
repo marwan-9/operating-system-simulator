@@ -7,10 +7,13 @@
 typedef struct node {
    int key;          //ID
    int arrival_time;
-   int priority;
+   signed int priority;
    int runtime;
    int data;
    int Live_Priority;
+   int pid;
    struct node *next;
+   int wating_Time;
+   int remaining_Time;
 } node;
 #endif

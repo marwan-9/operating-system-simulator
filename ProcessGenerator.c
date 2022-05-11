@@ -64,6 +64,11 @@ int main(int argc, char *argv[])
         printf("Please enter the quantum: \n");
         scanf("%s", quantum);
     }
+      if (atoi(argv[1]) == 4)
+    {
+        printf("Please enter the quantum: \n");
+        scanf("%s", quantum);
+    }
 
     sprintf(argv[3], "%d", index); // sending number of processes as the third argument
 
