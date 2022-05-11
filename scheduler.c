@@ -569,7 +569,9 @@ int main(int argc, char *argv[])
                     //int TA= getClk()-temp->arrival_time;
                     //int WTA = (getClk()-temp->arrival_time)/process_count;
                      temp->wating_Time = (getClk() - temp->arrival_time) - (temp->runtime- temp->remaining_Time);
-                    fprintf(logfile, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %f\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time,getClk()-temp->arrival_time,(float)((getClk()-temp->arrival_time)/atoi(argv[3])));
+                     avg_wait += (temp->wating_Time);
+                     wta+=(float) ((getClk() - temp->arrival_time) / temp->runtime);
+                    fprintf(logfile, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %f\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time,getClk()-temp->arrival_time,(float)(getClk() - temp->arrival_time) / temp->runtime);
                 
                         flags_sync[temp->priority]--;
 
@@ -707,6 +709,9 @@ int main(int argc, char *argv[])
     printf("exiting scheduler at time %d\n", getClk());
 
     // printing to .perf file
+    utilization= (utilization/getClk())*100;
+    wta /= atoi(argv[3]);
+    avg_wait /= atoi(argv[3]);
     fprintf(perf, "CPU utilization= %.2f %% Avg \nWTA =%.2f \nAvg Waiting =%.2f\n", utilization, wta, avg_wait);
 
     fclose(perf);
