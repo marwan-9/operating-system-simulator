@@ -388,9 +388,7 @@ int main(int argc, char *argv[])
             int stope=0;
             a=0;
             rec = msgrcv(msqid, &message, sizeof(message.process), 0, !IPC_NOWAIT);
-            //printf("ENTA KAM %d \n",rec); fflush(stdout);
             least_priority_now=message.process.priority;
-            printf("HNA HNA %d \n",stope); fflush(stdout);
 
         while (!isEmpty(&Q0) || a==0){   
             a=1;
@@ -416,13 +414,11 @@ int main(int argc, char *argv[])
                 }
 
                    
-                    //printf("\n WREENY %d %d %d \n",fixed_increm,how_much_now,incrementer); fflush(stdout);
 
                     //Looping on the given processes, to fill the queue of "nodes",
                     //i.e convert from the given struct to node struct
 
                     for (int i=fixed_increm; i<how_much_now; i++){
-                        //printf("ID %d \n",processes[fixed_increm].key); fflush(stdout);    
                     struct node* process= (struct node*)malloc(sizeof(struct node));
                     process->key=processes[i].key;
                     process->priority=processes[i].priority;
@@ -433,20 +429,16 @@ int main(int argc, char *argv[])
                     process->pid=-1;
                     fixed_increm++;           
 
-                            
-                    printf("flags_sync[PRIO] %d \n",flags_sync[process->priority]);
+          
                     if (flags_sync[process->priority] ==-1){ //If it is the first process in particular priority, Enqueue it.
-                        //printf("1 %d \n", isEmpty(&Q0)); fflush(stdout);
 
                         latch[process->priority]=process;
                         flags_sync[process->priority]++;
                     
                         if (isEmpty(&Q0)){
-                        //printf("NEW NODE \n"); fflush(stdout);
                         Q0 = newNode(process);
                         }
                         else{
-                         //printf("ENQUEE \n"); fflush(stdout);
 
                         EnQueue(&Q0,process);
                         }
@@ -454,24 +446,18 @@ int main(int argc, char *argv[])
                     }
                     
                     else {  //If it is NOT the first process in particular priority, link it to the chain.
-                        printf("INDDDDDDDDDD %d \n",process->priority);
                         insertAfter(latch[process->priority],process);
                         latch[process->priority]=process;
                     }
 
                     }
 
-                   //printf("a \n");
                     PrintQueue(&Q0); //Print to show the initial state of the MLFL.   
 
 
                     //Here the algoritm starts
                 
-       
-
-                    //printf("CLK= %d",getClk());
                     node* temp=DeQueue(&Q0); //This is the process meant to be executed
-                    printf("TEMP PID %d \n",temp->pid);
 
                     if (temp == NULL){}
                     else{
@@ -483,12 +469,10 @@ int main(int argc, char *argv[])
                         passed_here_flag=1;
                         pid=fork();
                         if (pid ==0){ //Only Child Enters
-                            printf ("FORKING \n"); fflush(stdout);
                             char *remaining_Time_char = malloc(sizeof(char));
                             char *quantum_char = malloc(sizeof(char));
                             sprintf(remaining_Time_char, "%d", temp->remaining_Time);
                             sprintf(quantum_char, "%d", quantum);
-                                // printf("runtime %s of process %d time rn %d\n",runtime_char,getpid(),getClk());
 
                             char *arg[] = {remaining_Time_char,quantum_char, NULL};
                             int execute = execv("./process.out", arg);
@@ -511,16 +495,12 @@ int main(int argc, char *argv[])
                         temp->wating_Time = (getClk() - temp->arrival_time) - (temp->runtime- temp->remaining_Time);
                         fprintf(logfile, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time-1);
                               
-
-                        //printf("STOPP1 \n"); fflush(stdout);
-
                     }
                     
                     else if (temp!=NULL && temp->pid!=-1 && pid!=0 && passed_here_flag==0){
                          Clock_now=getClk(); 
                          kill(temp->pid, SIGCONT);
                          
-                         printf("CONT SIG \n"); fflush(stdout);
 
                         temp->wating_Time = (getClk() - temp->arrival_time) - (temp->runtime- temp->remaining_Time);
                         fprintf(logfile, "At time %d process %d resumed arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time);
@@ -541,7 +521,6 @@ int main(int argc, char *argv[])
                     }
                     else 
                     isEmp=0;
-                    printf("IsEmpty %d \n",isEmp);
                 
                     if (temp->remaining_Time>0){
                         if (temp->remaining_Time<=quantum)
@@ -564,7 +543,6 @@ int main(int argc, char *argv[])
                     //Case1: Process has already finished
                     if (temp->remaining_Time==0){
                          process_count--;
-                    printf(" KHALAS \n"); fflush(stdout);
                     
                     //int TA= getClk()-temp->arrival_time;
                     //int WTA = (getClk()-temp->arrival_time)/process_count;
@@ -593,8 +571,6 @@ int main(int argc, char *argv[])
                                 Degrader++;
                             
                             } 
-                            printf("ENTA HNA ya deg ?? %d \n",Degrader); fflush(stdout);
-                            //printf("ENTA GET HNA? %d \n",Degrader); fflush(stdout);
                             latch[temp->Live_Priority+Degrader]->next=temp;
                               
                             latch[temp->Live_Priority+Degrader]=temp;
@@ -613,23 +589,18 @@ int main(int argc, char *argv[])
 
                     //Subcase2: finishing a specific snap to start a new one
                         else if ((temp->Live_Priority== 10 && temp->Live_Priority!=temp->priority) || isEmp==1 ){
-                          printf("HERE2?"); fflush(stdout);
                             temp->Live_Priority=temp->priority;  //Returning priority to its origin.
 
                             if (Resnap_indicator==0){
-                            printf("HERE 00?"); fflush(stdout);
 
-                            //memset(flags,0, 10);
                             
                             flags[0]=-1; flags[1]=-1; flags[2]=-1; flags[3]=-1; flags[4]=-1; flags[5]=-1;
                             flags[6]=-1; flags[7]=-1; flags[8]=-1; flags[9]=-1; flags[10]=-1; flags[11]=-1;
                             flags[12]=-1;  
                             Resnap_indicator++;
-                            //printf("FLAGS =0 \n"); fflush(stdout);
                             }
                           
                             if (flags[temp->Live_Priority]==-1 && temp->remaining_Time!=0 ){ //It is the first process in particular priority
-                                                        printf("IF MSH ELSE"); fflush(stdout);
 
                                 //if(current!=NULL && current->priority!=temp->priority){ //Cleaning the chain
                                 //current->next=NULL;
@@ -643,7 +614,6 @@ int main(int argc, char *argv[])
                             }
 
                             else { //It is NOT the first process in particular priority
-                                                                            printf("ELSE"); fflush(stdout);
 
                                 if(current->priority==temp->priority){ 
                                 current->next=temp;
@@ -660,8 +630,6 @@ int main(int argc, char *argv[])
 
                     //===============================================Re-Snaping============================================// 
                     if ((!isEmpty(&Q0) && temp->next!=NULL && temp->next->key==hold_key) || (isEmpty(&Q0) && temp->next==NULL) ){
-                        //printf("DID YOY GOT IN %d \n",flags[temp->Live_Priority]); fflush(stdout);
-                        printf("EMSHY M3aya \n"); fflush(stdout);
 
                         for (int i=0; i<=10; i++){      
                             if(Live_latch[i]!=NULL){
@@ -669,11 +637,9 @@ int main(int argc, char *argv[])
 
                                 if (!isEmpty(&Q0)){
                                 EnQueue(&Q0,Live_latch[i]);
-                                printf("ENQUE2 %d \n",i); fflush(stdout);
                                 }
                                 else if (isEmpty(&Q0)){
                                 Q0=newNode(Live_latch[i]);
-                                 printf("NEW NODE2 %d \n",flags[i]); fflush(stdout);
 
                                 }
                             

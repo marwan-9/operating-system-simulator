@@ -74,7 +74,6 @@ void insertAfter(struct node* prev_node, struct node* new_data)
 }
 
 void cleanChain(node* Chain_Head){
-         printf("NEWWWWWWW %d",Chain_Head->key); fflush(stdout);
 
    int p_ref;
 
