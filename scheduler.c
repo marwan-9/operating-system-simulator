@@ -116,8 +116,8 @@ int main(int argc, char *argv[])
         signal(SIGUSR1, ProcessTerminated);
         process_count = atoi(argv[3]); // number of processes
         struct PQNode *ReadyQ = NULL;
-        Running = NULL;
-        int last_runclk;
+        Running = NULL; //points to the currently running process node
+        int last_runclk; //holds the value of the clock at start/continue for the currently running process
 
         while (process_count > 0)
         {
@@ -128,17 +128,12 @@ int main(int argc, char *argv[])
 
                 // printf("received: %d at time %d \n", message.process.id, getClk());
                 utilization += message.process.runtime;
+                message.process.arrvialtime=getClk();
 
+                //enqueuing the arrived process
                 struct PQNode *newnode = PQnewNode(&message.process, message.process.priority, -1, message.process.runtime, 0, arrived);
-
-                if (PQisEmpty(&ReadyQ))
-                {
-                    ReadyQ = newnode;
-                }
-                else
-                {
-                    PQEnQueue(&ReadyQ, newnode);
-                }
+                    
+                PQEnQueue(&ReadyQ, newnode);
                 // printf("head %d\n", ReadyQ->process.id);
                 //  if (Running != NULL)
                 //  {
@@ -147,17 +142,19 @@ int main(int argc, char *argv[])
                 //  }
                 rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             }
-            //  peek and dequeue if time or if priority < priority running
-            //  in which case enqueue the running
+
+            //indicates whether a new process has been dequeued to run
             int flag = 0;
+            //case that no process is currently running
             if (PQisEmpty(&Running) && !PQisEmpty(&ReadyQ))
             {
-                // running the process
+                // dequeuing the process to run
                 // printf("before dequeuing %d\n", ReadyQ->process.id);
                 Running = PQDeQueue(&ReadyQ);
                 // printf("after dequeuing running is empty %d %d is empty q %d \n", isEmpty(&Running), Running->process.id, isEmpty(&ReadyQ));
                 flag = 1;
             }
+            //case that the recieved process has higher priority than the running process (pre-empt)
             else if (!PQisEmpty(&Running) && !PQisEmpty(&ReadyQ) && (PQpeek(&ReadyQ).priority < Running->process.priority))
             {
                 // stopping the old process
@@ -174,6 +171,7 @@ int main(int argc, char *argv[])
 
             if (flag == 1)
             {
+                //if the process is new and hasnt been forked before
                 if (Running->processPID == -1)
                 {
                     // fork and take id of process
@@ -191,6 +189,7 @@ int main(int argc, char *argv[])
                         perror("The error is: \n");
                         exit(-1);
                     }
+                    //pausing the scheduler till the process is forked so that the clock is synced between the files (gets resumed from inside the process.c file)
                     raise(SIGSTOP);
                     Running->processPID = pid;
                     Running->status = started;
@@ -198,6 +197,7 @@ int main(int argc, char *argv[])
                     Running->WaitingTime = (getClk() - Running->process.arrvialtime) - (Running->process.runtime - Running->ReaminingTime);
                     fprintf(logfile, "At time %d process %d started arr %d total %d remain %d wait %d\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->ReaminingTime, Running->WaitingTime);
                 }
+                //if the process is continuing (has been forked and preempted before)
                 else
                 {
                     // printf("continuing signal %d\n", Running->processPID);
@@ -247,17 +247,19 @@ int main(int argc, char *argv[])
             if (Running == NULL && ReadyQ != NULL)
             {
                 Running = PQDeQueue(&ReadyQ);
-                count = 0;
-                printf("running process %d\n", Running->process.id);
+                count = 0; //counts the number of seconds that pass as a process is running
+                //printf("running process %d\n", Running->process.id);
                 quantum = atoi(argv[2]);
+                //in case that the remaining time is less than the quantum then process runs to completion
                 if (Running->ReaminingTime < quantum)
                 {
                     quantum = Running->ReaminingTime;
                 }
 
+                //if the process hasnt been forked before
                 if (Running->processPID == -1)
                 {
-                    printf("forking\n");
+                    //printf("forking\n");
                     int pid = fork();
                     if (pid == 0)
                     {
@@ -277,24 +279,29 @@ int main(int argc, char *argv[])
                     raise(SIGSTOP);
                     fprintf(logfile, "At time %d process %d started arr %d total %d remain %d wait %d\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->ReaminingTime, Running->WaitingTime);
                 }
+                //if the process has been pre-empted before
                 else
                 {
-                    printf("continuing process\n");
+                   // printf("continuing process\n");
                     kill(Running->processPID, SIGCONT);
                     Running->status = resumed;
                     Running->WaitingTime = (getClk() - Running->process.arrvialtime) - (Running->process.runtime - Running->ReaminingTime);
                     fprintf(logfile, "At time %d process %d resumed arr %d total %d remain %d wait %d\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->ReaminingTime, Running->WaitingTime);
                 }
             }
+            //stopping the running process when it finishes its quantum
             if (count == quantum)
             {
-                printf("reached end of quantum, count %d at time %d\n", count, getClk());
-                printf("rem time in sched %d\n", Running->ReaminingTime);
+                //printf("reached end of quantum, count %d at time %d\n", count, getClk());
+                //printf("rem time in sched %d\n", Running->ReaminingTime);
+
+                //process finished
                 if (Running->ReaminingTime == 0)
                 {
                     int status;
+                    //waiting for the process to terminate
                     int rec_child = waitpid(Running->processPID, &status, 0);
-                    printf("rec child %d\n", rec_child);
+                    //printf("rec child %d\n", rec_child);
                     Running->status = finished;
                     process_count--;
                     avg_wait += Running->WaitingTime;
@@ -304,10 +311,13 @@ int main(int argc, char *argv[])
                     Running = NULL;
                     count=0;
                 }
+                //pausing the currently running process
                 else
                 {
+                    //case that the running process is not the only process in the queue
                     if (ReadyQ != NULL)
                     {
+                        //pause the running process to run another
                         kill(Running->processPID, SIGSTOP);
                         Running->status = stopped;
                         Running->WaitingTime = (getClk() - Running->process.arrvialtime) - (Running->process.runtime - Running->ReaminingTime);
@@ -316,7 +326,7 @@ int main(int argc, char *argv[])
                         int rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
                         while (rec != -1)
                         {
-                            printf("received: %d at time %d \n", message.process.id, getClk());
+                            //printf("received: %d at time %d \n", message.process.id, getClk());
                             utilization += message.process.runtime;
                             struct PQNode *newnode = PQnewNode(&message.process, 10, -1, message.process.runtime, 0, arrived);
                             PQEnQueue(&ReadyQ, newnode);
@@ -327,6 +337,7 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
+                        //giving the currently running process another quantum since its the only process in the queue (instead of pausing and continuing the same process)
                         count = 0;
                         quantum = atoi(argv[2]);
                         if (Running->ReaminingTime < quantum)
@@ -337,6 +348,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
+        //.perf file calculations
         wta /= atoi(argv[3]);
         avg_wait /= atoi(argv[3]);
         utilization /= getClk();
@@ -695,16 +707,16 @@ void ProcessTerminated(int signum)
     avg_wait += Running->WaitingTime;
     wta += (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime;
     fprintf(logfile, "At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
-    printf("At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
+    //printf("At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
     free(Running);
     Running = NULL;
     process_count--;
-    printf("process_count=%d\n", process_count);
+    //printf("process_count=%d\n", process_count);
 }
 
 void clockchange(int signum)
 {
     count++;
     Running->ReaminingTime--;
-    printf("count: %d rem time %d\n", count, Running->ReaminingTime);
+    //printf("count: %d rem time %d\n", count, Running->ReaminingTime);
 }
