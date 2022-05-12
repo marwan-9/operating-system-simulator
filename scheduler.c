@@ -307,6 +307,7 @@ int main(int argc, char *argv[])
                     avg_wait += Running->WaitingTime;
                     wta += (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime;
                     Running->WaitingTime = (getClk() - Running->process.arrvialtime) - (Running->process.runtime - Running->ReaminingTime);
+        
                     fprintf(logfile, "At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
                     Running = NULL;
                     count=0;
@@ -374,9 +375,12 @@ int main(int argc, char *argv[])
         int fixed_increm=0;
         int least_priority_now=-100;
         int a=0;
+        node* temp;
         node* current=NULL; //Works as temporary pointer to move around in Live_latch extended chain.
         node *Live_latch[11]; //Hold the updated snap of the MLFL after every loop.
         node *latch[11];  //Holds the initial snap of the MLFL. 
+        node* peeking=NULL; 
+
         struct QNode* Q0=NULL; //Defining the main queue.
         int how_much_now=0;
         //Filling both array with NULLs, as an initial state.
@@ -443,7 +447,7 @@ int main(int argc, char *argv[])
 
           
                     if (flags_sync[process->priority] ==-1){ //If it is the first process in particular priority, Enqueue it.
-
+                        
                         latch[process->priority]=process;
                         flags_sync[process->priority]++;
                     
@@ -468,8 +472,9 @@ int main(int argc, char *argv[])
 
 
                     //Here the algoritm starts
+                    node* tempprev= temp;
+                    temp=DeQueue(&Q0); //This is the process meant to be executed
                 
-                    node* temp=DeQueue(&Q0); //This is the process meant to be executed
 
                     if (temp == NULL){}
                     else{
@@ -505,7 +510,8 @@ int main(int argc, char *argv[])
                         
                         kill(temp->pid, SIGSTOP);
                         temp->wating_Time = (getClk() - temp->arrival_time) - (temp->runtime- temp->remaining_Time);
-                        fprintf(logfile, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time-1);
+                        if (temp->remaining_Time>1)
+                        fprintf(logfile, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time-1, temp->wating_Time-1);
                               
                     }
                     
@@ -513,8 +519,9 @@ int main(int argc, char *argv[])
                          Clock_now=getClk(); 
                          kill(temp->pid, SIGCONT);
                          
-
                         temp->wating_Time = (getClk() - temp->arrival_time) - (temp->runtime- temp->remaining_Time);
+                        
+                        if (temp!=tempprev  || temp->runtime-temp->remaining_Time==1 )
                         fprintf(logfile, "At time %d process %d resumed arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time);
 
                            
@@ -522,8 +529,12 @@ int main(int argc, char *argv[])
                         }
                         kill(temp->pid, SIGSTOP);
                         temp->wating_Time = (getClk() - temp->arrival_time) - (temp->runtime- temp->remaining_Time);
-                        fprintf(logfile, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time-1);
 
+                        if ( temp!=tempprev && temp->remaining_Time>1){
+                       
+                        fprintf(logfile, "At time %d process %d stopped arr %d total %d remain %d wait %d\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time-1, temp->wating_Time-1);
+
+                        }
                     }
                   
                 
@@ -550,6 +561,7 @@ int main(int argc, char *argv[])
                             EnQueue(&Q0,temp->next);
                         }
                     }
+                  
                     
                     //Now we have two main cases, whether the process has already finished or still has remaining runtime.
                     //Case1: Process has already finished
@@ -562,9 +574,11 @@ int main(int argc, char *argv[])
                      avg_wait += (temp->wating_Time);
                      wta+=(float) ((getClk() - temp->arrival_time) / temp->runtime);
                     fprintf(logfile, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %f\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time,getClk()-temp->arrival_time,(float)(getClk() - temp->arrival_time) / temp->runtime);
-                
-                        flags_sync[temp->priority]--;
 
+                        if (flags_sync[temp->priority]>-1)
+                        flags_sync[temp->priority]--;
+                        else 
+                        flags_sync[temp->priority]=-1;
                     }
 
                     //Case2: Process still has remaining runtime.
@@ -654,7 +668,7 @@ int main(int argc, char *argv[])
                                 Q0=newNode(Live_latch[i]);
 
                                 }
-                            
+                                
                                 latch[i]=LastNodeInChain(Live_latch[i]);
                                 Live_latch[i]=NULL;
                                  flags[i]=-1;

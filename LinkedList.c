@@ -20,7 +20,7 @@ void printList(node *input) {
 	
    //start from the beginning
    while (ptr!=NULL){
-     printf("(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->remaining_Time,ptr->Live_Priority);
+     printf("(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->remaining_Time,ptr->Live_Priority); 
       //fprintf(MLFL_Sim,"(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->remaining_Time,ptr->Live_Priority);
       //fprintf(MLFL_Sim,"\n");
       ptr = ptr->next;

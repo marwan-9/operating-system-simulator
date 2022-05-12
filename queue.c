@@ -118,5 +118,5 @@ while (!isEmpty(Q0)){
       aux++;
       }
    }
-   printf("\n");
+   printf("\n"); fflush(stdout);
 }

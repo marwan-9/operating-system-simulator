@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
             {
               remainingtime--;
               kill(getppid(),SIGUSR2);
-              printf("clk changed at time %d rem time %d\n",getClk(),remainingtime);
+              //printf("clk changed at time %d rem time %d\n",getClk(),remainingtime);
             }
     }
 
