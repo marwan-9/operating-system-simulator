@@ -35,6 +35,17 @@ struct process
     int memorysize;
 };
 
+
+struct Tnode {
+    struct Tnode* left;
+    struct Tnode* right;
+    int occupied;
+    int key;
+    struct Tnode* parent;
+    int start;
+    int end;
+};
+
 struct msgbuff
 {
     long mtype;
