@@ -1,6 +1,10 @@
 #include "PriorityQueue.c"
 #include "LinkedList.c"
 #include "queue.c"
+#include "Tree.c"
+
+//Memory head node
+struct Tnode* memory;
 
 // HPF variables
 struct PQNode *Running;
@@ -13,6 +17,7 @@ int count = 0;
 // file variables
 FILE *logfile;
 FILE *perf;
+FILE*memoryfile;
 float utilization = 0, avg_wait = 0, wta = 0;
 
 void ProcessTerminated(int signum);
@@ -20,6 +25,9 @@ void clockchange(int signum);
 
 int main(int argc, char *argv[])
 {
+    //initializing memory
+    memory=initMemory();
+
     // establishing communication with the clock module
     initClk();
 
@@ -31,9 +39,11 @@ int main(int argc, char *argv[])
     // open the output file
     logfile = fopen("./scheduler.log", "w");
     perf = fopen("./scheduler.perf", "w");
+    memoryfile=fopen("./memory.log","w");
 
     // printing the header of output file
     fprintf(logfile, "#At time x process y state arr w total z remain y wait k\n");
+    fprintf(memoryfile,"#At time x allocated y bytes for process z from i to j\n");
 
     // run the chosen algorithm
 
@@ -694,6 +704,7 @@ int main(int argc, char *argv[])
 
     fclose(perf);
     fclose(logfile);
+    fclose(memoryfile);
 
     // releasing communication with the clock module
     destroyClk(1);
