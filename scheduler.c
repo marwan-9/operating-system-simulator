@@ -23,6 +23,20 @@ float utilization = 0, avg_wait = 0, wta = 0;
 void ProcessTerminated(int signum);
 void clockchange(int signum);
 
+struct Tnode* allocateprocess(struct process process)
+{
+    int start;
+    struct Tnode* allocatednode=Allocate(&memory,process.memorysize,&start);
+    fprintf(memoryfile,"At time %d allocated %d bytes for process %d from %d to %d\n",getClk(),process.memorysize,process.id,allocatednode->start,allocatednode->end);
+    return allocatednode;
+}
+
+void deallocateprocess(struct process process,int start,int end)
+{
+    deallocation(&memory,start,end);
+    fprintf(memoryfile,"At time %d freed %d bytes from process %d from %d to %d\n",getClk(),process.memorysize,process.id,start,end);
+}
+
 int main(int argc, char *argv[])
 {
     //initializing memory
@@ -63,14 +77,17 @@ int main(int argc, char *argv[])
         {
 
             struct msgbuff message;
+            struct Tnode* newprocess;
             int rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             while (rec_value != -1)
             {
                 //printf("received: %d at time %d \n", message.process.memorysize, getClk());
 
                 utilization += message.process.runtime;
+                
+                newprocess=allocateprocess(message.process);
 
-                struct PQNode *newnode = PQnewNode(&message.process, message.process.priority, -1, message.process.runtime, 0, arrived);
+                struct PQNode *newnode = PQnewNode(&message.process, message.process.priority, -1, message.process.runtime, 0,newprocess->start,newprocess->end ,arrived);
 
                 if (PQisEmpty(&ReadyQ))
                 {
@@ -80,6 +97,7 @@ int main(int argc, char *argv[])
                 {
                     Enqueue_RT(&ReadyQ, newnode);
                 }
+
 
                 rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             }
@@ -132,6 +150,7 @@ int main(int argc, char *argv[])
         while (process_count > 0)
         {
             struct msgbuff message;
+            struct Tnode* newprocess;
             int rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             while (rec_value != -1)
             {
@@ -139,9 +158,10 @@ int main(int argc, char *argv[])
                 printf("received: %d at time %d \n", message.process.id, getClk());
                 utilization += message.process.runtime;
                 message.process.arrvialtime=getClk();
+                newprocess=allocateprocess(message.process);
 
                 //enqueuing the arrived process
-                struct PQNode *newnode = PQnewNode(&message.process, message.process.priority, -1, message.process.runtime, 0, arrived);
+                struct PQNode *newnode = PQnewNode(&message.process, message.process.priority, -1, message.process.runtime, 0,newprocess->start,newprocess->end, arrived);
                     
                 PQEnQueue(&ReadyQ, newnode);
                 // printf("head %d\n", ReadyQ->process.id);
@@ -242,12 +262,14 @@ int main(int argc, char *argv[])
         while (process_count > 0)
         {
             struct msgbuff message;
+            struct Tnode* newprocess;
             int rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             while (rec != -1)
             {
                 printf("received: %d at time %d \n", message.process.id, getClk());
                 utilization += message.process.runtime;
-                struct PQNode *newnode = PQnewNode(&message.process, 10, -1, message.process.runtime, 0, arrived);
+                newprocess=allocateprocess(message.process);
+                struct PQNode *newnode = PQnewNode(&message.process, 10, -1, message.process.runtime, 0, newprocess->start,newprocess->end, arrived);
                 // printf("Run time is %d\n", newnode->ReaminingTime);
                 PQEnQueue(&ReadyQ, newnode);
                 rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
@@ -318,6 +340,7 @@ int main(int argc, char *argv[])
                     wta += (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime;
                     Running->WaitingTime = (getClk() - Running->process.arrvialtime) - (Running->process.runtime - Running->ReaminingTime);
                     fprintf(logfile, "At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
+                    deallocateprocess(Running->process,Running->startaddress,Running->endaddress);
                     Running = NULL;
                     count=0;
                 }
@@ -338,7 +361,8 @@ int main(int argc, char *argv[])
                         {
                             //printf("received: %d at time %d \n", message.process.id, getClk());
                             utilization += message.process.runtime;
-                            struct PQNode *newnode = PQnewNode(&message.process, 10, -1, message.process.runtime, 0, arrived);
+                            newprocess=allocateprocess(message.process);
+                            struct PQNode *newnode = PQnewNode(&message.process, 10, -1, message.process.runtime, 0,newprocess->start,newprocess->end, arrived);
                             PQEnQueue(&ReadyQ, newnode);
                             rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
                         }
@@ -719,6 +743,7 @@ void ProcessTerminated(int signum)
     wta += (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime;
     fprintf(logfile, "At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
     //printf("At time %d process %d finished arr %d total %d remain 0 wait %d TA %d WTA %.2f\n", getClk(), Running->process.id, Running->process.arrvialtime, Running->process.runtime, Running->WaitingTime, getClk() - Running->process.arrvialtime, (float)(getClk() - Running->process.arrvialtime) / Running->process.runtime);
+    deallocateprocess(Running->process,Running->startaddress,Running->endaddress);
     free(Running);
     Running = NULL;
     process_count--;

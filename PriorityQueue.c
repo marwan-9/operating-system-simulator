@@ -11,12 +11,14 @@ struct PQNode {
     int processPID;
     int ReaminingTime;
     int WaitingTime;
+    int startaddress;
+    int endaddress;
     enum status status;
 };
 
 
 // Function to Create A New Node
-struct PQNode* PQnewNode(struct process* input, int Qpriority,int Pid,int remainingtime, int waitingtime, enum status status)
+struct PQNode* PQnewNode(struct process* input, int Qpriority,int Pid,int remainingtime, int waitingtime,int startaddress,int endaddress, enum status status)
 {
     struct PQNode* temp = (struct PQNode*)malloc(sizeof(struct PQNode));
     temp->process = *input;
@@ -24,6 +26,8 @@ struct PQNode* PQnewNode(struct process* input, int Qpriority,int Pid,int remain
     temp->processPID=Pid;
     temp->ReaminingTime=remainingtime;
     temp->WaitingTime=waitingtime;
+    temp->startaddress=startaddress;
+    temp->endaddress=endaddress;
     temp->status=status;
     temp->next = NULL;
     return temp;

@@ -11,17 +11,6 @@ void OccupyChildren(struct Tnode * root)
     OccupyChildren(root->right);
 }
 
-void OccupuyParent(struct Tnode* root)
-{
-    if(root==NULL)
-    {
-        return;
-    }
-    root->occupied = 0;
-    printf("Was here when start was %d and end was %d\n",root->start,root->end);
-    OccupuyParent(root->parent);
-}
-
 void FreeChildren(struct Tnode * root)
 {
     if (root == NULL)
@@ -182,9 +171,7 @@ struct Tnode *Allocate(struct Tnode ** binary_tree, int memoryamount, int *Begin
         if (temp->key==GivenKey && GetOccupied(temp)==0){
             temp->occupied=0;
 
-        OccupyChildren(temp); 
-
-        OccupuyParent(temp->parent);  
+        OccupyChildren(temp);   
 
         *BeginAt = CalculateAlloctionBegin(temp->key,Nodecounter);
                 printf("TEMP KWY %d %d\n", temp->occupied,Nodecounter);
