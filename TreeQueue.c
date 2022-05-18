@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "headers.h"
+//#include "headers.h"
 
-struct node {
+struct TQnode {
 	struct Tnode* TreeNode;
-	struct node *next;
+	struct TQnode *next;
 };
 
-struct node *front = NULL;
-struct node *rear = NULL;
+struct TQnode *front = NULL;
+struct TQnode *rear = NULL;
 
 // Enqueue() operation on a queue
 void enqueue(struct Tnode* input) {
-	struct node *ptr;
-	ptr = (struct node *)malloc(sizeof(struct node));
+	struct TQnode *ptr;
+	ptr = (struct TQnode *)malloc(sizeof(struct TQnode));
 	ptr->TreeNode = input;
 	ptr->next = NULL;
 	if ((front == NULL) && (rear == NULL)) {
@@ -32,7 +32,7 @@ struct Tnode* dequeue() {
 		return NULL;
         }
 	 else {
-		struct node *temp = front;
+		struct TQnode *temp = front;
 		struct Tnode* temp_Treenode = front->TreeNode;
 		front = front->next;
 		free(temp);

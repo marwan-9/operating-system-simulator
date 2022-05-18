@@ -210,21 +210,21 @@ struct Tnode *Allocate(struct Tnode ** binary_tree, int memoryamount, int *Begin
 
 
 
-int main()
-{
-    struct Tnode* root=NULL;
-    struct Tnode* search=NULL;
-    int beginAt;
-    root=initMemory();
-    struct Tnode *trial;
+// int main()
+// {
+//     struct Tnode* root=NULL;
+//     struct Tnode* search=NULL;
+//     int beginAt;
+//     root=initMemory();
+//     struct Tnode *trial;
 
     
     
-    trial = Allocate(&root,64,&beginAt);
-    if (trial != NULL)
-    printf ("ALLOCATTED %d \n",beginAt);
-    else 
-    printf ("NOT ALLOCATTED %d \n",beginAt);
+//     trial = Allocate(&root,64,&beginAt);
+//     if (trial != NULL)
+//     printf ("ALLOCATTED %d \n",beginAt);
+//     else 
+//     printf ("NOT ALLOCATTED %d \n",beginAt);
 
 
     // trial = Allocate(&root,16,&beginAt);
@@ -266,18 +266,18 @@ int main()
  
 
     //insert(&root,0,1023,NULL,3);
-    display_preorder(root);
-    deallocation(&root,0,31);
-    display_preorder(root);
-    search=Treesearch(&root, 0, 511);
-    printf("%d\n",search->parent==NULL);
+    // display_preorder(root);
+    // deallocation(&root,0,31);
+    // display_preorder(root);
+    // search=Treesearch(&root, 0, 511);
+    // printf("%d\n",search->parent==NULL);
     //if(search!=NULL)
-    {
+    //{
         //printf("%d %d\n",search->start,search->end);
-    }
+    //}
     //else
-    {
+    //{
        //printf("Not found\n");
-    }
-}
+    //}
+//}
 
