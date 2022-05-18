@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
         ProcessArray[index].runtime = filechar;
         fscanf(fp, "%d", &filechar);
         ProcessArray[index].priority = filechar;
+        fscanf(fp, "%d", &filechar);
+        ProcessArray[index].memorysize = filechar;
 
         index++;
     }
@@ -60,6 +62,11 @@ int main(int argc, char *argv[])
     //argv[2] = "0";
     char quantum[10]="0";
     if (atoi(argv[1]) == 3)
+    {
+        printf("Please enter the quantum: \n");
+        scanf("%s", quantum);
+    }
+      if (atoi(argv[1]) == 4)
     {
         printf("Please enter the quantum: \n");
         scanf("%s", quantum);

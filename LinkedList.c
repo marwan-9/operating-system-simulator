@@ -4,25 +4,31 @@
 #include <stdbool.h>
 #include "node.h"
 
+//FILE *MLFL_Sim;
+
 
 
 struct node *head = NULL;
 struct node *current = NULL;
 
+
 //display the list
 void printList(node *input) {
-
    struct node *ptr = input;
-  printf("\n");
-
+   
+   //MLFL_Sim = fopen("./MLFL_Sim.txt", "w");
 	
    //start from the beginning
    while (ptr!=NULL){
-     printf("(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->runtime,ptr->Live_Priority);
+     printf("(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->remaining_Time,ptr->Live_Priority);
+      //fprintf(MLFL_Sim,"(#%d,P%d,T%d,LV%d) -->",ptr->key,ptr->priority,ptr->remaining_Time,ptr->Live_Priority);
+      //fprintf(MLFL_Sim,"\n");
       ptr = ptr->next;
-
      
    }
+   printf("\n");
+       //fclose(MLFL_Sim);
+
 	
   // printf(" ]");
 }
@@ -68,20 +74,24 @@ void insertAfter(struct node* prev_node, struct node* new_data)
 }
 
 void cleanChain(node* Chain_Head){
+
    int p_ref;
 
-   if (Chain_Head!=NULL)
-   p_ref = Chain_Head->priority;
+   if (Chain_Head!=NULL){
+
+      p_ref = Chain_Head->priority;
+
+   }
+
 
    node* temp = Chain_Head;
-         
+                  
    while (temp!=NULL && temp->next!=NULL){
-          
+
       if (temp->next->priority!=p_ref){
           
          temp->next=NULL;
 
-           // printf("NEWWWWWWW %d %d",temp->key, temp->next->key); fflush(stdout);
       }
       
       if (temp->next!=NULL && temp->next->runtime==0){

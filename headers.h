@@ -32,6 +32,7 @@ struct process
     int arrvialtime;
     int runtime;
     int priority;
+    int memorysize;
 };
 
 struct msgbuff
