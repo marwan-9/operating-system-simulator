@@ -15,5 +15,8 @@ typedef struct node {
    struct node *next;
    int wating_Time;
    int remaining_Time;
+   int startaddress;
+   int endaddress;
+   int memorysize;
 } node;
 #endif

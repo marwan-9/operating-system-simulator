@@ -408,6 +408,7 @@ int main(int argc, char *argv[])
         int fixed_increm=0;
         int least_priority_now=-100;
         int a=0;
+        struct Tnode* newprocess=NULL;
         node* current=NULL; //Works as temporary pointer to move around in Live_latch extended chain.
         node *Live_latch[11]; //Hold the updated snap of the MLFL after every loop.
         node *latch[11];  //Holds the initial snap of the MLFL. 
@@ -434,13 +435,20 @@ int main(int argc, char *argv[])
             int stope=0;
             a=0;
             rec = msgrcv(msqid, &message, sizeof(message.process), 0, !IPC_NOWAIT);
+            newprocess=allocateprocess(message.process);
             least_priority_now=message.process.priority;
 
         while (!isEmpty(&Q0) || a==0){   
             a=1;
 
             if (stope!=0)
-            rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
+            {
+                rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
+                if(rec!=-1)
+                {
+                    newprocess=allocateprocess(message.process);
+                }
+            }
             stope=1;
 
             while (rec != -1)
@@ -452,8 +460,15 @@ int main(int argc, char *argv[])
                     processes[incrementer].priority=message.process.priority;
                     processes[incrementer].runtime=message.process.runtime;
                     processes[incrementer].remaining_Time=message.process.runtime;
+                    processes[incrementer].startaddress=newprocess->start;
+                    processes[incrementer].endaddress=newprocess->end;
+                    processes[incrementer].memorysize=message.process.memorysize;
                     incrementer++;
                     rec = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
+                    if(rec!=-1)
+                    {
+                        newprocess=allocateprocess(message.process);
+                    }
                     how_much_now++;
                     if (message.process.priority>least_priority_now)
                     least_priority_now=message.process.priority;
@@ -472,6 +487,9 @@ int main(int argc, char *argv[])
                     process->arrival_time=processes[i].arrival_time;
                     process->runtime=processes[i].runtime;
                     process->remaining_Time=processes[i].remaining_Time;
+                    process->startaddress=processes[i].startaddress;
+                    process->endaddress=processes[i].endaddress;
+                    process->memorysize=processes[i].memorysize;
                     process->pid=-1;
                     fixed_increm++;           
 
@@ -596,7 +614,10 @@ int main(int argc, char *argv[])
                      avg_wait += (temp->wating_Time);
                      wta+=(float) ((getClk() - temp->arrival_time) / temp->runtime);
                     fprintf(logfile, "At time %d process %d finished arr %d total %d remain %d wait %d TA %d WTA %f\n", getClk(), temp->key, temp->arrival_time, temp->runtime, temp->remaining_Time, temp->wating_Time,getClk()-temp->arrival_time,(float)(getClk() - temp->arrival_time) / temp->runtime);
-                
+                        struct process tempprocess;
+                        tempprocess.memorysize=temp->memorysize;
+                        tempprocess.id=temp->key;
+                        deallocateprocess(tempprocess,temp->startaddress,temp->endaddress);
                         flags_sync[temp->priority]--;
 
                     }
