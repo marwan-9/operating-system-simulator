@@ -11,6 +11,26 @@ void OccupyChildren(struct Tnode * root)
     OccupyChildren(root->right);
 }
 
+void OccupuyParent(struct Tnode* root)
+{
+    if(root==NULL)
+    {
+        return;
+    }
+    root->occupied = 0;
+    printf("Was here when start was %d and end was %d\n",root->start,root->end);
+    OccupuyParent(root->parent);
+}
+
+void FreeChildren(struct Tnode * root)
+{
+    if (root == NULL)
+        return;
+    root->occupied = -1;
+    FreeChildren(root->left);
+    FreeChildren(root->right);
+}
+
 int GetOccupied(struct Tnode * root)
 {
     if (root == NULL)
@@ -53,26 +73,10 @@ void insert(struct Tnode ** binary_tree, int start, int end, struct Tnode* paren
 struct Tnode* initMemory ()
 {
     int size=1024;
-    struct Tnode* head;
-    //struct Tnode** tmphead;
+    struct Tnode* head=NULL;
     for (int i=0;i<8;i++)
     {
-        if(i==0)
-        {
-            head= (struct Tnode *)malloc(sizeof(struct Tnode));
-            head->start=0;
-            head->end=(size-1);
-            head->parent=NULL;
-            head->occupied=-1;
-            head->left=head->right=NULL;
-            head->key=1;
-            //tmphead=&head;
-            size=size/2;
-        }
-        else
-        {
-            insert(&head,head->start,head->end,head,i,7);
-        }
+        insert(&head,0,1023,NULL,i,7);
     }
     return head;
 }
@@ -107,7 +111,7 @@ struct Tnode *Treesearch(struct Tnode ** binary_tree, int start, int end) {
 
 void display_preorder(struct Tnode * binary_tree) {
     if (binary_tree) {
-        printf("%d %d\n",binary_tree->start,binary_tree->end);
+        printf("%d %d %d\n",binary_tree->start,binary_tree->end,binary_tree->occupied);
         display_preorder(binary_tree->left);
         display_preorder(binary_tree->right);
     }
@@ -118,6 +122,7 @@ void deallocation(struct Tnode** Head,int start, int end)
     struct Tnode *deallocated=Treesearch(Head, start, end);
     deallocated->occupied=-1;
     struct Tnode* parent=deallocated->parent;
+    FreeChildren(deallocated);
     while(parent != NULL)
     {
         if(parent->left->occupied==-1 && parent->right->occupied==-1)
@@ -177,10 +182,12 @@ struct Tnode *Allocate(struct Tnode ** binary_tree, int memoryamount, int *Begin
         if (temp->key==GivenKey && GetOccupied(temp)==0){
             temp->occupied=0;
 
-        OccupyChildren(temp);   
+        OccupyChildren(temp); 
+
+        OccupuyParent(temp->parent);  
 
         *BeginAt = CalculateAlloctionBegin(temp->key,Nodecounter);
-                printf("TEMP KWY %d %d", temp->occupied,Nodecounter);
+                printf("TEMP KWY %d %d\n", temp->occupied,Nodecounter);
 
         Emptyit();
         return temp;
@@ -220,48 +227,50 @@ int main()
     printf ("NOT ALLOCATTED %d \n",beginAt);
 
 
-    trial = Allocate(&root,16,&beginAt);
-    if (trial != NULL)
-    printf ("ALLOCATTED %d \n",beginAt);
-    else 
-    printf ("NOT ALLOCATTED %d \n",beginAt);
+    // trial = Allocate(&root,16,&beginAt);
+    // if (trial != NULL)
+    // printf ("ALLOCATTED %d \n",beginAt);
+    // else 
+    // printf ("NOT ALLOCATTED %d \n",beginAt);
  
 
 
-    trial = Allocate(&root,32,&beginAt);
-    if (trial != NULL)
-    printf ("ALLOCATTED %d \n",beginAt);
-    else 
-    printf ("NOT ALLOCATTED %d \n",beginAt);
+    // trial = Allocate(&root,32,&beginAt);
+    // if (trial != NULL)
+    // printf ("ALLOCATTED %d \n",beginAt);
+    // else 
+    // printf ("NOT ALLOCATTED %d \n",beginAt);
  
 
 
-     trial = Allocate(&root,16,&beginAt);
-    if (trial != NULL)
-    printf ("ALLOCATTED %d \n",beginAt);
-    else 
-    printf ("NOT ALLOCATTED %d \n",beginAt);
+    //  trial = Allocate(&root,16,&beginAt);
+    // if (trial != NULL)
+    // printf ("ALLOCATTED %d \n",beginAt);
+    // else 
+    // printf ("NOT ALLOCATTED %d \n",beginAt);
 
 
-     trial = Allocate(&root,32,&beginAt);
-    if (trial != NULL)
-    printf ("ALLOCATTED %d \n",beginAt);
-    else 
-    printf ("NOT ALLOCATTED %d \n",beginAt);
+    //  trial = Allocate(&root,32,&beginAt);
+    // if (trial != NULL)
+    // printf ("ALLOCATTED %d \n",beginAt);
+    // else 
+    // printf ("NOT ALLOCATTED %d \n",beginAt);
 
 
-     trial = Allocate(&root,16,&beginAt);
-    if (trial != NULL)
-    printf ("ALLOCATTED %d \n",beginAt);
-    else 
-    printf ("NOT ALLOCATTED %d \n",beginAt);
+    //  trial = Allocate(&root,16,&beginAt);
+    // if (trial != NULL)
+    // printf ("ALLOCATTED %d \n",beginAt);
+    // else 
+    // printf ("NOT ALLOCATTED %d \n",beginAt);
 
  
 
     //insert(&root,0,1023,NULL,3);
-    //display_preorder(root);
-    //search=Treesearch(&root, 768, 1023);
-    //printf("%d\n",root->right==NULL);
+    display_preorder(root);
+    deallocation(&root,0,31);
+    display_preorder(root);
+    search=Treesearch(&root, 0, 511);
+    printf("%d\n",search->parent==NULL);
     //if(search!=NULL)
     {
         //printf("%d %d\n",search->start,search->end);
