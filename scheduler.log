@@ -1,29 +1,41 @@
 #At time x process y state arr w total z remain y wait k
-At time 1 process 2 started arr 1 total 2 remain 2 wait 0
-At time 2 process 2 stopped arr 1 total 2 remain 2 wait 0
-At time 2 process 1 started arr 1 total 4 remain 4 wait 1
-At time 3 process 1 stopped arr 1 total 4 remain 4 wait 1
-At time 3 process 3 started arr 2 total 1 remain 1 wait 1
-At time 4 process 3 stopped arr 2 total 1 remain 1 wait 1
-At time 4 process 3 finished arr 2 total 1 remain 0 wait 1 TA 2 WTA 2.000000
-At time 4 process 2 resumed arr 1 total 2 remain 1 wait 2
-At time 5 process 2 stopped arr 1 total 2 remain 1 wait 2
-At time 5 process 2 finished arr 1 total 2 remain 0 wait 2 TA 4 WTA 2.000000
-At time 5 process 4 started arr 4 total 5 remain 5 wait 1
-At time 6 process 4 stopped arr 4 total 5 remain 5 wait 1
-At time 6 process 1 resumed arr 1 total 4 remain 3 wait 4
-At time 7 process 1 stopped arr 1 total 4 remain 3 wait 4
-At time 7 process 4 resumed arr 4 total 5 remain 4 wait 2
-At time 8 process 4 stopped arr 4 total 5 remain 4 wait 2
-At time 8 process 4 resumed arr 4 total 5 remain 3 wait 2
-At time 9 process 4 stopped arr 4 total 5 remain 3 wait 2
-At time 9 process 1 resumed arr 1 total 4 remain 2 wait 6
-At time 10 process 1 stopped arr 1 total 4 remain 2 wait 6
-At time 10 process 4 resumed arr 4 total 5 remain 2 wait 3
-At time 11 process 4 stopped arr 4 total 5 remain 2 wait 3
-At time 11 process 4 resumed arr 4 total 5 remain 1 wait 3
-At time 12 process 4 stopped arr 4 total 5 remain 1 wait 3
-At time 12 process 4 finished arr 4 total 5 remain 0 wait 3 TA 8 WTA 1.600000
-At time 12 process 1 resumed arr 1 total 4 remain 1 wait 8
-At time 13 process 1 stopped arr 1 total 4 remain 1 wait 8
-At time 13 process 1 finished arr 1 total 4 remain 0 wait 8 TA 12 WTA 3.000000
+At time 2 process 5 started arr 1 total 0 remain 0 wait 1
+At time 2 process 5 finished arr 1 total 0 remain 0 wait 1 TA 1 WTA inf
+At time 2 process 16 started arr 1 total 1 remain 1 wait 1
+At time 3 process 16 finished arr 1 total 1 remain 0 wait 1 TA 2 WTA 2.00
+At time 3 process 10 started arr 1 total 1 remain 1 wait 2
+At time 4 process 10 finished arr 1 total 1 remain 0 wait 2 TA 3 WTA 3.00
+At time 4 process 3 started arr 1 total 1 remain 1 wait 3
+At time 5 process 3 finished arr 1 total 1 remain 0 wait 3 TA 4 WTA 4.00
+At time 5 process 20 started arr 1 total 2 remain 2 wait 4
+At time 7 process 20 finished arr 1 total 2 remain 0 wait 4 TA 6 WTA 3.00
+At time 7 process 7 started arr 1 total 2 remain 2 wait 6
+At time 9 process 7 finished arr 1 total 2 remain 0 wait 6 TA 8 WTA 4.00
+At time 9 process 4 started arr 1 total 3 remain 3 wait 8
+At time 12 process 4 finished arr 1 total 3 remain 0 wait 8 TA 11 WTA 3.67
+At time 12 process 19 started arr 1 total 4 remain 4 wait 11
+At time 16 process 19 finished arr 1 total 4 remain 0 wait 11 TA 15 WTA 3.75
+At time 16 process 14 started arr 1 total 4 remain 4 wait 15
+At time 20 process 14 finished arr 1 total 4 remain 0 wait 15 TA 19 WTA 4.75
+At time 20 process 13 started arr 1 total 4 remain 4 wait 19
+At time 24 process 13 finished arr 1 total 4 remain 0 wait 19 TA 23 WTA 5.75
+At time 24 process 12 started arr 1 total 4 remain 4 wait 23
+At time 28 process 12 finished arr 1 total 4 remain 0 wait 23 TA 27 WTA 6.75
+At time 28 process 17 started arr 1 total 5 remain 5 wait 27
+At time 33 process 17 finished arr 1 total 5 remain 0 wait 27 TA 32 WTA 6.40
+At time 33 process 15 started arr 1 total 6 remain 6 wait 32
+At time 39 process 15 finished arr 1 total 6 remain 0 wait 32 TA 38 WTA 6.33
+At time 39 process 2 started arr 1 total 6 remain 6 wait 38
+At time 45 process 2 finished arr 1 total 6 remain 0 wait 38 TA 44 WTA 7.33
+At time 45 process 11 started arr 1 total 7 remain 7 wait 44
+At time 52 process 11 finished arr 1 total 7 remain 0 wait 44 TA 51 WTA 7.29
+At time 52 process 18 started arr 1 total 9 remain 9 wait 51
+At time 61 process 18 finished arr 1 total 9 remain 0 wait 51 TA 60 WTA 6.67
+At time 61 process 8 started arr 1 total 9 remain 9 wait 60
+At time 70 process 8 finished arr 1 total 9 remain 0 wait 60 TA 69 WTA 7.67
+At time 70 process 6 started arr 1 total 9 remain 9 wait 69
+At time 79 process 6 finished arr 1 total 9 remain 0 wait 69 TA 78 WTA 8.67
+At time 79 process 1 started arr 1 total 9 remain 9 wait 78
+At time 88 process 1 finished arr 1 total 9 remain 0 wait 78 TA 87 WTA 9.67
+At time 88 process 9 started arr 1 total 11 remain 11 wait 87
+At time 99 process 9 finished arr 1 total 11 remain 0 wait 87 TA 98 WTA 8.91

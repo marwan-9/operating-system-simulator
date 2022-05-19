@@ -27,7 +27,8 @@ struct Tnode* allocateprocess(struct process process)
 {
     int start;
     struct Tnode* allocatednode=Allocate(&memory,process.memorysize,&start);
-    fprintf(memoryfile,"At time %d allocated %d bytes for process %d from %d to %d\n",getClk(),process.memorysize,process.id,allocatednode->start,allocatednode->end);
+    if (allocatednode!=NULL)
+        fprintf(memoryfile,"At time %d allocated %d bytes for process %d from %d to %d\n",getClk(),process.memorysize,process.id,allocatednode->start,allocatednode->end);
     return allocatednode;
 }
 
@@ -81,11 +82,14 @@ int main(int argc, char *argv[])
             int rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             while (rec_value != -1)
             {
-                //printf("received: %d at time %d \n", message.process.memorysize, getClk());
+                printf("received: %d at time %d \n", message.process.arrvialtime, getClk());
 
                 utilization += message.process.runtime;
                 
                 newprocess=allocateprocess(message.process);
+
+                if (newprocess)
+                {
 
                 struct PQNode *newnode = PQnewNode(&message.process, message.process.priority, -1, message.process.runtime, 0,newprocess->start,newprocess->end ,arrived);
 
@@ -98,6 +102,12 @@ int main(int argc, char *argv[])
                     Enqueue_RT(&ReadyQ, newnode);
                 }
 
+                }
+                else
+                {
+                    process_count--;
+                    printf("decrement process count\n");
+                }
 
                 rec_value = msgrcv(msqid, &message, sizeof(message.process), 0, IPC_NOWAIT);
             }
