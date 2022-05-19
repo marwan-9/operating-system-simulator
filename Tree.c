@@ -35,7 +35,7 @@ int GetOccupied(struct Tnode * root)
 }
 
 
-void insert(struct Tnode ** binary_tree, int start, int end, struct Tnode* parent, int keyIn, int counter) {
+void insert(struct Tnode ** binary_tree, int start, int end, struct Tnode* parent, int counter) {
     struct Tnode* tmp = NULL;
     if(!(*binary_tree)) {
         tmp = (struct Tnode *)malloc(sizeof(struct Tnode));
@@ -55,18 +55,15 @@ void insert(struct Tnode ** binary_tree, int start, int end, struct Tnode* paren
             return;
         }
         counter--;
-        insert(&(*binary_tree)->left, start, start+((end-start)/2), tmp, keyIn, counter);
-        insert(&(*binary_tree)->right, (start+(end-start)/2)+1, end, tmp, keyIn, counter);
+        insert(&(*binary_tree)->left, start, start+((end-start)/2), tmp, counter);
+        insert(&(*binary_tree)->right, (start+(end-start)/2)+1, end, tmp, counter);
 }
 
 struct Tnode* initMemory ()
 {
     int size=1024;
     struct Tnode* head=NULL;
-    for (int i=0;i<8;i++)
-    {
-        insert(&head,0,1023,NULL,i,7);
-    }
+    insert(&head,0,1023,NULL,7);
     return head;
 }
 
