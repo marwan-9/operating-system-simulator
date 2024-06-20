@@ -1,2 +1,2 @@
-# Operating System Project
+# Operating System Simulator 
 Readme file to be added.
